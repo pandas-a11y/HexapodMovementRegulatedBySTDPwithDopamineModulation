@@ -244,13 +244,13 @@ syn_inh_cpg.connect(i=con_map['inh_cpg_i'], j=con_map['inh_cpg_j'])
 syn_inh_eff.connect(i=con_map['inh_eff_i'], j=con_map['inh_eff_j'])
 syn_eff_inh.connect(i=con_map['eff_inh_i'], j=con_map['eff_inh_j'])
 
-# Setting weight
-syn_cpg_cpg.w = 1 * volt
-syn_cpg_inh.w = 1 * volt
-syn_cpg_eff.w = 1 * volt
-syn_inh_cpg.w = 1 * volt
-syn_inh_eff.w = 1 * volt
-syn_eff_inh.w = 1 * volt
+# Setting scale-appropriate weights
+syn_cpg_cpg.w = 200 * mV
+syn_cpg_inh.w = 100 * mV
+syn_cpg_eff.w = 200 * mV
+syn_inh_cpg.w = 100 * mV
+syn_inh_eff.w = 100 * mV
+syn_eff_inh.w = 100 * mV
 
 # Connecting networks
 # Connection main neuron group to auxiliary modulator group
@@ -260,7 +260,7 @@ syn_main_mod.w = 100 * mV
 
 # Connecting modulator group to CPG group
 syn_mod_cpg = Synapses(group_modulator, group_cpg, on_pre='v_post+=10 * volt')
-syn_mod_cpg.connect(i=[0, 1, 2, 3, 4, 5], j=[0, 1, 2, 3, 4, 5])
+syn_mod_cpg.connect(i=[0, 1, 2, 3, 4, 5], j=[0, 0, 0, 1, 1, 1])
 
 # Dopamine reward signalling
 syn_reward = Synapses(aux_searching, syn_main, on_pre={'reward': 'd_post += epsilon_dopa'},
@@ -290,7 +290,6 @@ syn_inp_main.w = 100 * mV
 # Setting up monitors
 mon_main = SpikeMonitor(group_main_neurons)
 mon_eff = SpikeMonitor(group_eff)
-mon_score = StateMonitor(aux_searching, 'eaten', record=True)
 
 fig, (pl1, pl2, pl3, pl4) = subplots(4, 1)
 
