@@ -65,7 +65,12 @@ def getDirection(angle_target, n_neurons):
 # by Sen Song, Kenneth D. Miller and L. F. Abbott, Nature Neuroscience 3, no. 9 (2000): 919-926.
 
 # Auxiliary environment parameters
-simulation_duration = 120 * second
+simulation_duration_graph = 120 * second
+simulation_duration_score = 5 * second
+scoreSTDP = 0
+scoreDopa = 0
+score_num_trials = 36
+
 food_location = {'food_x': [0.9, 0.1, 0.4, 0.3, -1.3, 1, 2, -3, 0.5, -1.2],
                  'food_y': [1, 1, -0.2, 4, 0.8, -1.3, -2, -1.4, 1.1, -1.3]}
 food_amount = len(food_location['food_x'])
@@ -294,9 +299,10 @@ mon_eff = SpikeMonitor(group_eff)
 fig, (pl1, pl2, pl3, pl4) = subplots(4, 1)
 
 # Simulation without dopamine modulation
+store()
+
 syn_main.mode = 0
-run(simulation_duration/2, report='text')
-print("Total food eaten", sum(aux_searching.eaten[:]))
+run(simulation_duration_graph/2, report='text')
 pl1.set_title('STDP')
 pl1.plot(mon_main.t/ms, mon_main.i, 'ok')
 pl1.set_xlabel('Time, ms')
@@ -308,8 +314,7 @@ pl3.set_ylabel('Neuron index')
 
 # Simulation with dopamine modulation
 syn_main.mode = 1
-run(simulation_duration/2, report='text')
-print("Total food eaten", sum(aux_searching.eaten[:]))
+run(simulation_duration_graph/2, report='text')
 pl2.set_title('Dopamine modulated STDP')
 pl2.plot(mon_main.t/ms, mon_main.i, 'ok')
 pl2.set_xlabel('Time, ms')
@@ -320,3 +325,19 @@ pl4.set_xlabel('Time, ms')
 pl4.set_ylabel('Neuron index')
 tight_layout()
 show()
+
+# Counting scores of times goal was achieved for each mode
+restore()
+syn_main.mode = 0
+for i in range(score_num_trials):
+    run(simulation_duration_score, report='text')
+    scoreSTDP += sum(aux_searching.eaten[:])
+
+syn_main.mode = 1
+for i in range(score_num_trials):
+    run(simulation_duration_score, report='text')
+    scoreDopa += sum(aux_searching.eaten[:])
+
+print('Total scores:')
+print("STDP: ", scoreSTDP/score_num_trials)
+print("Dopa: ", scoreDopa/score_num_trials)
